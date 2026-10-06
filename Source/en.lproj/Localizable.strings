@@ -231,6 +231,8 @@
 "Ctrl + ` Key:" = "Ctrl + ` Key:";
 "Ctrl + `  Key:" = "Ctrl + `  Key:";
 "Input Big 5 Code" = "Input Big 5 Code";
+"Shift Key:" = "Shift Key:";
+"Press Shift to toggle Bopomofo and English" = "Press Shift to toggle Bopomofo and English";
 "Punctuation Symbols:" = "Punctuation Symbols:";
 "Repeated key to next candidate" = "Repeated key to next candidate";
 "When enabled, if you type \"Shift+,\" repeatedly with the standard layout, it will produce symbols like < and 《." = "When enabled, if you type \"Shift+,\" repeatedly with the standard layout, it will produce symbols like < and 《.";

@@ -56,6 +56,7 @@ private let kControlEnterOutputKey = "ControlEnterOutput"
 private let kSwitchInputSourceUponCommandKeyPressEnabledKey = "SwitchInputSourceUponCommandKeyPressEnabled"
 private let kSwitchInputSourceUponCommandKeyPressInputSourceIDKey = "SwitchInputSourceUponCommandKeyPressInputSourceID"
 private let kShiftEnterEnabledKey = "ShiftEnterEnabled"
+private let kShiftKeyToToggleInputModeEnabledKey = "ShiftKeyToToggleInputModeEnabled"
 private let kRepeatedPunctuationToSelectCandidateEnabledKey =
     "RepeatedPunctuationToSelectCandidateEnabled"
 private let kUseCustomUserPhraseLocation = "UseCustomUserPhraseLocation"
@@ -241,6 +242,7 @@ class Preferences: NSObject {
             kSwitchInputSourceUponCommandKeyPressEnabledKey,
             kSwitchInputSourceUponCommandKeyPressInputSourceIDKey,
             kShiftEnterEnabledKey,
+            kShiftKeyToToggleInputModeEnabledKey,
             kRepeatedPunctuationToSelectCandidateEnabledKey,
             kUseCustomUserPhraseLocation,
             kCustomUserPhraseLocation,
@@ -271,6 +273,8 @@ class Preferences: NSObject {
         Preferences.switchInputSourceUponCommandKeyPressEnabled = Preferences.switchInputSourceUponCommandKeyPressEnabled
         Preferences.switchInputSourceUponCommandKeyPressInputSourceID = Preferences.switchInputSourceUponCommandKeyPressInputSourceID
         Preferences.shiftEnterEnabled = Preferences.shiftEnterEnabled
+        Preferences.shiftKeyToToggleInputModeEnabled =
+            Preferences.shiftKeyToToggleInputModeEnabled
         Preferences.repeatedPunctuationToSelectCandidateEnabled =
             Preferences.repeatedPunctuationToSelectCandidateEnabled
         Preferences.addPhraseHookEnabled = Preferences.addPhraseHookEnabled
@@ -464,6 +468,9 @@ extension Preferences {
 
     @UserDefault(key: kShiftEnterEnabledKey, defaultValue: true)
     @objc static var shiftEnterEnabled: Bool
+
+    @UserDefault(key: kShiftKeyToToggleInputModeEnabledKey, defaultValue: true)
+    @objc static var shiftKeyToToggleInputModeEnabled: Bool
 
     @UserDefault(key: kRepeatedPunctuationToSelectCandidateEnabledKey, defaultValue: false)
     @objc static var repeatedPunctuationToSelectCandidateEnabled: Bool

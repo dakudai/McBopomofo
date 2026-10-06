@@ -641,6 +641,12 @@ private struct AdvancedPreferencesView: View {
                 Toggle(localized("Input Big 5 Code"), isOn: $preferences.big5InputEnabled)
             }
 
+            PreferenceRow(localized("Shift Key:")) {
+                Toggle(
+                    localized("Press Shift to toggle Bopomofo and English"),
+                    isOn: $preferences.shiftKeyToToggleInputModeEnabled)
+            }
+
             PreferenceRow(localized("Punctuation Symbols:")) {
                 Toggle(
                     localized("Repeated key to next candidate"),

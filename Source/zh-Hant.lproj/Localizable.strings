@@ -229,6 +229,8 @@
 "Ctrl + ` Key:" = "Ctrl + ` 按鍵：";
 "Ctrl + `  Key:" = "Ctrl + ` 按鍵：";
 "Input Big 5 Code" = "使用 Ctrl + ` 輸入 Big5 內碼";
+"Shift Key:" = "Shift 鍵：";
+"Press Shift to toggle Bopomofo and English" = "按 Shift 切換注音／英數輸入";
 "Punctuation Symbols:" = "標點符號：";
 "Repeated key to next candidate" = "連續輸入標點切換候選字";
 "When enabled, if you type \"Shift+,\" repeatedly with the standard layout, it will produce symbols like < and 《." = "啟用這個選項後，在標準鍵盤配置下，可以用連續按下「Shift+,」後，從輸入逗號（，），變成輸入書名號（〈、《）等。";

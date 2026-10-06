@@ -54,6 +54,11 @@ struct ShiftInputModeSwitcher {
         shiftPressedAlone = false
     }
 
+    mutating func reset() {
+        isEnglishMode = false
+        shiftPressedAlone = false
+    }
+
     mutating func flagsChanged(keyCode: UInt16, modifierFlags: NSEvent.ModifierFlags) -> Bool? {
         let isShiftKey = keyCode == UInt16(kVK_Shift) || keyCode == UInt16(kVK_RightShift)
         guard isShiftKey else {
@@ -273,13 +278,18 @@ class McBopomofoInputMethodController: IMKInputController {
             return false
         }
 
+        if !Preferences.shiftKeyToToggleInputModeEnabled {
+            shiftInputModeSwitcher.reset()
+        }
+
         if event.type == .keyDown {
             shiftInputModeSwitcher.keyDownOccurred()
         }
 
         if event.type == .flagsChanged {
-            if shiftInputModeSwitcher.flagsChanged(
-                keyCode: event.keyCode, modifierFlags: event.modifierFlags) != nil
+            if Preferences.shiftKeyToToggleInputModeEnabled,
+                shiftInputModeSwitcher.flagsChanged(
+                    keyCode: event.keyCode, modifierFlags: event.modifierFlags) != nil
             {
                 if state is InputState.NotEmpty {
                     // Commit the marked text verbatim so an unfinished reading is preserved.

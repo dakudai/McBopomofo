@@ -154,6 +154,14 @@ final class PreferencesViewModel: NSObject, ObservableObject {
         }
     }
 
+    var shiftKeyToToggleInputModeEnabled: Bool {
+        get { Preferences.shiftKeyToToggleInputModeEnabled }
+        set {
+            objectWillChange.send()
+            Preferences.shiftKeyToToggleInputModeEnabled = newValue
+        }
+    }
+
     var escToCleanInputBuffer: Bool {
         get { Preferences.escToCleanInputBuffer }
         set {
