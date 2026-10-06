@@ -16,6 +16,8 @@
 
 要注意的是 macOS 可能會限制同一次 login session 能 kill 同一個輸入法 process 的次數（安裝程式透過 kill input method process 來讓新版的輸入法生效）。如果安裝若干次後，發現程式修改的結果並沒有出現，或甚至輸入法已無法再選用，只要登出目前帳號再重新登入即可。
 
+實機紀錄：在 macOS 27.0.1 上，安裝本機 build 後用地球鍵從 ABC 切換到 McBopomofo 時，Safari 與 CotEditor 曾出現相同的 `CFRelease() called with NULL` 閃退，堆疊位於 Apple `TextInputUIMacHelper` 的輸入來源 HUD。登出再登入後切換似乎恢復正常；目前僅確認這次觀察，尚未判定是登入階段的暫存狀態或輸入來源切換交互造成。若重現，請保留新的 crash report。
+
 ## 社群公約
 
 歡迎小麥注音用戶回報問題與指教，也歡迎大家參與小麥注音開發。
