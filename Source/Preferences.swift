@@ -55,6 +55,8 @@ private let kSwitchInputSourceUponShiftLetterKeyComboEnabledKey = "SwitchInputSo
 private let kControlEnterOutputKey = "ControlEnterOutput"
 private let kSwitchInputSourceUponCommandKeyPressEnabledKey = "SwitchInputSourceUponCommandKeyPressEnabled"
 private let kSwitchInputSourceUponCommandKeyPressInputSourceIDKey = "SwitchInputSourceUponCommandKeyPressInputSourceID"
+private let kSwitchInputSourceUponShiftKeyPressEnabledKey = "SwitchInputSourceUponShiftKeyPressEnabled"
+private let kSwitchInputSourceUponShiftKeyPressInputSourceIDKey = "SwitchInputSourceUponShiftKeyPressInputSourceID"
 private let kShiftEnterEnabledKey = "ShiftEnterEnabled"
 private let kRepeatedPunctuationToSelectCandidateEnabledKey =
     "RepeatedPunctuationToSelectCandidateEnabled"
@@ -240,6 +242,8 @@ class Preferences: NSObject {
             kControlEnterOutputKey,
             kSwitchInputSourceUponCommandKeyPressEnabledKey,
             kSwitchInputSourceUponCommandKeyPressInputSourceIDKey,
+            kSwitchInputSourceUponShiftKeyPressEnabledKey,
+            kSwitchInputSourceUponShiftKeyPressInputSourceIDKey,
             kShiftEnterEnabledKey,
             kRepeatedPunctuationToSelectCandidateEnabledKey,
             kUseCustomUserPhraseLocation,
@@ -270,6 +274,8 @@ class Preferences: NSObject {
         Preferences.controlEnterOutput = Preferences.controlEnterOutput
         Preferences.switchInputSourceUponCommandKeyPressEnabled = Preferences.switchInputSourceUponCommandKeyPressEnabled
         Preferences.switchInputSourceUponCommandKeyPressInputSourceID = Preferences.switchInputSourceUponCommandKeyPressInputSourceID
+        Preferences.switchInputSourceUponShiftKeyPressEnabled = Preferences.switchInputSourceUponShiftKeyPressEnabled
+        Preferences.switchInputSourceUponShiftKeyPressInputSourceID = Preferences.switchInputSourceUponShiftKeyPressInputSourceID
         Preferences.shiftEnterEnabled = Preferences.shiftEnterEnabled
         Preferences.repeatedPunctuationToSelectCandidateEnabled =
             Preferences.repeatedPunctuationToSelectCandidateEnabled
@@ -518,6 +524,13 @@ extension Preferences {
 
     @UserDefault(key: kSwitchInputSourceUponCommandKeyPressInputSourceIDKey, defaultValue: "com.apple.keylayout.ABC")
     static var switchInputSourceUponCommandKeyPressInputSourceID: String
+
+    /// Switch input source when the Shift key is pressed and released on its own.
+    @UserDefault(key: kSwitchInputSourceUponShiftKeyPressEnabledKey, defaultValue: false)
+    static var switchInputSourceUponShiftKeyPressEnabled: Bool
+
+    @UserDefault(key: kSwitchInputSourceUponShiftKeyPressInputSourceIDKey, defaultValue: "com.apple.keylayout.ABC")
+    static var switchInputSourceUponShiftKeyPressInputSourceID: String
 }
 
 @objc class UserPhraseLocationHelper: NSObject {

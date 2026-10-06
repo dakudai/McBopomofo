@@ -57,6 +57,9 @@ class McBopomofoInputMethodController: IMKInputController {
     var keyHandler: KeyHandler = KeyHandler()
     var state: InputState = InputState.Empty()
 
+    /// True while Shift has been pressed and nothing else has happened since.
+    private var isShiftPressedAlone = false
+
     // Share the stored issues, so a set of issues is shown as notification only once.
     static var latestUserFileIssues: [String] = []
 
@@ -226,7 +229,32 @@ class McBopomofoInputMethodController: IMKInputController {
             return false
         }
 
+        if event.type == .keyDown {
+            isShiftPressedAlone = false
+        }
+
         if event.type == .flagsChanged {
+            let isShiftKey = event.keyCode == UInt16(kVK_Shift) || event.keyCode == UInt16(kVK_RightShift)
+            if isShiftKey && Preferences.switchInputSourceUponShiftKeyPressEnabled {
+                var flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+                flags.remove(.capsLock)
+                if flags == .shift {
+                    // Shift went down with no other modifier held.
+                    isShiftPressedAlone = true
+                } else if flags.isEmpty && isShiftPressedAlone {
+                    // Shift released without any key in between: switch.
+                    isShiftPressedAlone = false
+                    keyHandler.clear()
+                    handle(state: InputState.SwitchingInputSource(sourceID: Preferences.switchInputSourceUponShiftKeyPressInputSourceID), client: client)
+                    return false
+                } else {
+                    isShiftPressedAlone = false
+                }
+            } else {
+                // Any other modifier change cancels a pending lone-Shift press.
+                isShiftPressedAlone = false
+            }
+
             if Preferences.switchInputSourceUponCommandKeyPressEnabled,
                (event.keyCode == UInt16(kVK_Command) || event.keyCode == UInt16(kVK_RightCommand)),
                event.modifierFlags.contains(.command) {
