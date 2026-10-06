@@ -22,6 +22,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 import CandidateUI
+import Carbon
 import XCTest
 
 @testable import McBopomofo
@@ -54,6 +55,59 @@ class KeyHandlerBopomofoTests: XCTestCase {
         Preferences.switchInputSourceUponShiftLetterKeyComboEnabled = savedSwitchInputSourceUponShiftLetterKeyComboEnabled
         Preferences.chineseConversionEnabled = chineseConversionEnabled
         Preferences.keyboardLayout = savedKeyboardLayout
+    }
+
+    func testLoneShiftTogglesInternalInputMode() {
+        var switcher = ShiftInputModeSwitcher()
+
+        XCTAssertNil(switcher.flagsChanged(keyCode: UInt16(kVK_Shift), modifierFlags: .shift))
+        XCTAssertEqual(switcher.flagsChanged(keyCode: UInt16(kVK_Shift), modifierFlags: []), true)
+        XCTAssertTrue(switcher.isEnglishMode)
+
+        XCTAssertNil(switcher.flagsChanged(keyCode: UInt16(kVK_Shift), modifierFlags: .shift))
+        XCTAssertEqual(switcher.flagsChanged(keyCode: UInt16(kVK_Shift), modifierFlags: []), false)
+        XCTAssertFalse(switcher.isEnglishMode)
+    }
+
+    func testShiftWithAnotherKeyDoesNotToggleInternalInputMode() {
+        var switcher = ShiftInputModeSwitcher()
+
+        XCTAssertNil(switcher.flagsChanged(keyCode: UInt16(kVK_Shift), modifierFlags: .shift))
+        switcher.keyDownOccurred()
+        XCTAssertNil(switcher.flagsChanged(keyCode: UInt16(kVK_Shift), modifierFlags: []))
+        XCTAssertFalse(switcher.isEnglishMode)
+    }
+
+    func testShiftWithAnotherModifierDoesNotToggleInternalInputMode() {
+        var switcher = ShiftInputModeSwitcher()
+
+        XCTAssertNil(
+            switcher.flagsChanged(
+                keyCode: UInt16(kVK_Shift), modifierFlags: [.shift, .command]))
+        XCTAssertNil(
+            switcher.flagsChanged(
+                keyCode: UInt16(kVK_Shift), modifierFlags: [.command]))
+        XCTAssertFalse(switcher.isEnglishMode)
+    }
+
+    func testEnglishModeCommitsPrintableInputButPassesShortcutsThrough() {
+        XCTAssertEqual(
+            ShiftInputModeSwitcher.textToCommit(inputText: "A", modifierFlags: .shift), "A")
+        XCTAssertEqual(
+            ShiftInputModeSwitcher.textToCommit(inputText: "a", modifierFlags: []), "a")
+        XCTAssertNil(
+            ShiftInputModeSwitcher.textToCommit(inputText: "a", modifierFlags: .command))
+        XCTAssertNil(
+            ShiftInputModeSwitcher.textToCommit(inputText: "a", modifierFlags: .control))
+        XCTAssertNil(
+            ShiftInputModeSwitcher.textToCommit(inputText: "a", modifierFlags: .option))
+        XCTAssertNil(ShiftInputModeSwitcher.textToCommit(inputText: nil, modifierFlags: []))
+        XCTAssertNil(ShiftInputModeSwitcher.textToCommit(inputText: "", modifierFlags: []))
+        XCTAssertNil(ShiftInputModeSwitcher.textToCommit(inputText: "\r", modifierFlags: []))
+        XCTAssertNil(ShiftInputModeSwitcher.textToCommit(inputText: "\t", modifierFlags: []))
+        XCTAssertNil(ShiftInputModeSwitcher.textToCommit(inputText: "\u{7F}", modifierFlags: []))
+        XCTAssertNil(
+            ShiftInputModeSwitcher.textToCommit(inputText: "\u{F700}", modifierFlags: []))
     }
 
     func testSyncWithPreferences() {

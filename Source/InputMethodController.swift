@@ -46,6 +46,51 @@ extension CandidateController {
     static let vertical = VerticalCandidateController()
 }
 
+struct ShiftInputModeSwitcher {
+    private(set) var isEnglishMode = false
+    private var shiftPressedAlone = false
+
+    mutating func keyDownOccurred() {
+        shiftPressedAlone = false
+    }
+
+    mutating func flagsChanged(keyCode: UInt16, modifierFlags: NSEvent.ModifierFlags) -> Bool? {
+        let isShiftKey = keyCode == UInt16(kVK_Shift) || keyCode == UInt16(kVK_RightShift)
+        guard isShiftKey else {
+            shiftPressedAlone = false
+            return nil
+        }
+
+        var flags = modifierFlags.intersection(.deviceIndependentFlagsMask)
+        flags.remove(.capsLock)
+        if flags == .shift {
+            shiftPressedAlone = true
+        } else if flags.isEmpty && shiftPressedAlone {
+            shiftPressedAlone = false
+            isEnglishMode.toggle()
+            return isEnglishMode
+        } else {
+            shiftPressedAlone = false
+        }
+        return nil
+    }
+
+    static func textToCommit(inputText: String?, modifierFlags: NSEvent.ModifierFlags) -> String? {
+        let shortcutModifiers: NSEvent.ModifierFlags = [.command, .control, .option]
+        guard modifierFlags.intersection(shortcutModifiers).isEmpty,
+            let inputText,
+            !inputText.isEmpty,
+            inputText.unicodeScalars.allSatisfy({
+                !CharacterSet.controlCharacters.contains($0)
+                    && $0.properties.generalCategory != .privateUse
+            })
+        else {
+            return nil
+        }
+        return inputText
+    }
+}
+
 @objc(McBopomofoInputMethodController)
 class McBopomofoInputMethodController: IMKInputController {
 
@@ -57,8 +102,7 @@ class McBopomofoInputMethodController: IMKInputController {
     var keyHandler: KeyHandler = KeyHandler()
     var state: InputState = InputState.Empty()
 
-    /// True while Shift has been pressed and nothing else has happened since.
-    private var isShiftPressedAlone = false
+    private var shiftInputModeSwitcher = ShiftInputModeSwitcher()
 
     // Share the stored issues, so a set of issues is shown as notification only once.
     static var latestUserFileIssues: [String] = []
@@ -230,29 +274,21 @@ class McBopomofoInputMethodController: IMKInputController {
         }
 
         if event.type == .keyDown {
-            isShiftPressedAlone = false
+            shiftInputModeSwitcher.keyDownOccurred()
         }
 
         if event.type == .flagsChanged {
-            let isShiftKey = event.keyCode == UInt16(kVK_Shift) || event.keyCode == UInt16(kVK_RightShift)
-            if isShiftKey && Preferences.switchInputSourceUponShiftKeyPressEnabled {
-                var flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
-                flags.remove(.capsLock)
-                if flags == .shift {
-                    // Shift went down with no other modifier held.
-                    isShiftPressedAlone = true
-                } else if flags.isEmpty && isShiftPressedAlone {
-                    // Shift released without any key in between: switch.
-                    isShiftPressedAlone = false
-                    keyHandler.clear()
-                    handle(state: InputState.SwitchingInputSource(sourceID: Preferences.switchInputSourceUponShiftKeyPressInputSourceID), client: client)
-                    return false
+            if shiftInputModeSwitcher.flagsChanged(
+                keyCode: event.keyCode, modifierFlags: event.modifierFlags) != nil
+            {
+                if state is InputState.NotEmpty {
+                    // Commit the marked text verbatim so an unfinished reading is preserved.
+                    handle(state: .Empty(), client: client)
                 } else {
-                    isShiftPressedAlone = false
+                    commitComposition(client)
+                    handle(state: .Empty(), client: client)
                 }
-            } else {
-                // Any other modifier change cancels a pending lone-Shift press.
-                isShiftPressedAlone = false
+                keyHandler.clear()
             }
 
             if Preferences.switchInputSourceUponCommandKeyPressEnabled,
@@ -263,15 +299,13 @@ class McBopomofoInputMethodController: IMKInputController {
                 return false
             }
 
+        }
+
+        if event.type == .keyUp {
             if state is InputState.Empty {
                 return false
             }
-            // Handle key up events during active input state.
-            //
-            // This prevents double-space from affecting the current input.
-            // While macOS may normally insert a period on double space, this
-            // should be suppressed when there is an active composing buffer or
-            // candidate window.
+            // Suppress double-space handling while the input method has active state.
             return true
         }
 
@@ -294,6 +328,18 @@ class McBopomofoInputMethodController: IMKInputController {
             }
             (client as? IMKTextInput)?.overrideKeyboard(withKeyboardNamed: basisKeyboardLayoutID)
             return false
+        }
+
+        if shiftInputModeSwitcher.isEnglishMode {
+            guard
+                let text = ShiftInputModeSwitcher.textToCommit(
+                    inputText: event.characters, modifierFlags: event.modifierFlags)
+            else {
+                return false
+            }
+            (client as? IMKTextInput)?.insertText(
+                text, replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
+            return true
         }
 
         var textFrame = NSRect.zero
